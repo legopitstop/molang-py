@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>molang.astnodes &mdash; molang 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            molang
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">molang</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">molang</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">molang.astnodes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for molang.astnodes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``astnodes`` module</span>
+<span class="sd">    ===================</span>
+
+<span class="sd">    Contains all Ast Node definitions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">antlr4.Token</span> <span class="kn">import</span> <span class="n">CommonToken</span>
+
+<span class="n">Comments</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;Comment&quot;</span><span class="p">]]</span>
+
+
+<span class="k">def</span> <span class="nf">_equal_dicts</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">ignore_keys</span><span class="p">):</span>
+    <span class="n">ignored</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ignore_keys</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k1</span><span class="p">,</span> <span class="n">v1</span> <span class="ow">in</span> <span class="n">d1</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignored</span> <span class="ow">and</span> <span class="p">(</span><span class="n">k1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d2</span> <span class="ow">or</span> <span class="n">d2</span><span class="p">[</span><span class="n">k1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">k2</span><span class="p">,</span> <span class="n">v2</span> <span class="ow">in</span> <span class="n">d2</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignored</span> <span class="ow">and</span> <span class="n">k2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="Node">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Node">[docs]</a>
+<span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for AST node.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">comments</span><span class="p">:</span> <span class="n">Comments</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">first_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CommonToken</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">last_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CommonToken</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Node display name</span>
+<span class="sd">            comments: Optional comments</span>
+<span class="sd">            first_token: First Antlr token</span>
+<span class="sd">            last_token: Last Antlr token</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">comments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">comments</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comments</span><span class="p">:</span> <span class="n">Comments</span> <span class="o">=</span> <span class="n">comments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CommonToken</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CommonToken</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_token</span>
+
+        <span class="c1"># We want to have nodes be serializable with pickle.</span>
+        <span class="c1"># To allow that we must not have mutable fields such as streams.</span>
+        <span class="c1"># Tokens have streams, create a stream-less copy of tokens.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">CommonToken</span><span class="o">.</span><span class="n">EMPTY_SOURCE</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">CommonToken</span><span class="o">.</span><span class="n">EMPTY_SOURCE</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_equal_dicts</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;_first_token&quot;</span><span class="p">,</span> <span class="s2">&quot;_last_token&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">first_token</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CommonToken</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        First token of a node.</span>
+
+<span class="sd">        Note: Token is disconnected from underline source streams.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span>
+
+    <span class="nd">@first_token</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">first_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CommonToken</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">CommonToken</span><span class="o">.</span><span class="n">EMPTY_SOURCE</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_token</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CommonToken</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Last token of a node.</span>
+
+<span class="sd">        Note: Token is disconnected from underline source streams.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span>
+
+    <span class="nd">@last_token</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">last_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CommonToken</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">CommonToken</span><span class="o">.</span><span class="n">EMPTY_SOURCE</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_char</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span><span class="o">.</span><span class="n">start</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stop_char</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span><span class="o">.</span><span class="n">stop</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_token</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">line</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Line number.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span><span class="o">.</span><span class="n">line</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_token</span> <span class="k">else</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Node.to_json">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Node.to_json">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="p">{</span>
+                <span class="o">**</span><span class="p">{</span>
+                    <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span>
+                <span class="p">},</span>
+                <span class="o">**</span><span class="p">{</span>
+                    <span class="s2">&quot;start_char&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_char</span><span class="p">,</span>
+                    <span class="s2">&quot;stop_char&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_char</span><span class="p">,</span>
+                    <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Comment">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Comment">[docs]</a>
+<span class="k">class</span> <span class="nc">Comment</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_multi_line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Comment&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_multi_line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">is_multi_line</span></div>
+
+
+
+<div class="viewcode-block" id="Expression">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Expression">[docs]</a>
+<span class="k">class</span> <span class="nc">Expression</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define a Molang expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        wrapped (`bool`): True if expression is between parentheses</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wrapped</span><span class="p">:</span> <span class="nb">bool</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">wrapped</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Expression</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span> <span class="o">=</span> <span class="n">wrapped</span></div>
+
+
+
+<div class="viewcode-block" id="Statement">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Statement">[docs]</a>
+<span class="k">class</span> <span class="nc">Statement</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Molang statement.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Block">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Block">[docs]</a>
+<span class="k">class</span> <span class="nc">Block</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define a Molang Block.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Statement</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Block&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Statement</span><span class="p">]</span> <span class="o">=</span> <span class="n">body</span></div>
+
+
+
+<div class="viewcode-block" id="Chunk">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Chunk">[docs]</a>
+<span class="k">class</span> <span class="nc">Chunk</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define a Molang chunk.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        body (`Block`): Chunk body.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Chunk</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Chunk&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">body</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">molang.ast</span> <span class="kn">import</span> <span class="n">to_pretty_str</span>
+        <span class="k">return</span> <span class="n">to_pretty_str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Left Hand Side expression.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Lhs">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Lhs">[docs]</a>
+<span class="k">class</span> <span class="nc">Lhs</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define a Molang Left Hand Side expression.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Name">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Name">[docs]</a>
+<span class="k">class</span> <span class="nc">Name</span><span class="p">(</span><span class="n">Lhs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define a Molang name expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        id (`string`): Id.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">identifier</span></div>
+
+
+
+<div class="viewcode-block" id="IndexNotation">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.IndexNotation">[docs]</a>
+<span class="k">class</span> <span class="nc">IndexNotation</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">DOT</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># obj.foo</span>
+    <span class="n">SQUARE</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># obj[foo]</span></div>
+
+
+
+<div class="viewcode-block" id="Index">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Index">[docs]</a>
+<span class="k">class</span> <span class="nc">Index</span><span class="p">(</span><span class="n">Lhs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define a Molang index expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        idx (`Expression`): Index expression.</span>
+<span class="sd">        value (`string`): Id.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">idx</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">:</span> <span class="n">Name</span><span class="p">,</span>
+        <span class="n">notation</span><span class="p">:</span> <span class="n">IndexNotation</span> <span class="o">=</span> <span class="n">IndexNotation</span><span class="o">.</span><span class="n">DOT</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Index</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Index&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">:</span> <span class="n">Name</span> <span class="o">=</span> <span class="n">idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">notation</span><span class="p">:</span> <span class="n">IndexNotation</span> <span class="o">=</span> <span class="n">notation</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; Statements                                                              &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Assign">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Assign">[docs]</a>
+<span class="k">class</span> <span class="nc">Assign</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Molang global assignment statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        targets (`list&lt;Node&gt;`): List of targets.</span>
+<span class="sd">        values (`list&lt;Node&gt;`): List of values.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Assign&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="n">targets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span></div>
+
+
+
+<div class="viewcode-block" id="LocalAssign">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.LocalAssign">[docs]</a>
+<span class="k">class</span> <span class="nc">LocalAssign</span><span class="p">(</span><span class="n">Assign</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Molang local assignment statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        targets (`list&lt;Node&gt;`): List of targets.</span>
+<span class="sd">        values (`list&lt;Node&gt;`): List of values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LocalAssign&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="While">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.While">[docs]</a>
+<span class="k">class</span> <span class="nc">While</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Molang while statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        test (`Node`): Expression to test.</span>
+<span class="sd">        body (`Block`): List of statements to execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;While&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">test</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span></div>
+
+
+
+<div class="viewcode-block" id="Do">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Do">[docs]</a>
+<span class="k">class</span> <span class="nc">Do</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Molang do end statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        body (`Block`): List of statements to execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Do&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span></div>
+
+
+
+<div class="viewcode-block" id="Repeat">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Repeat">[docs]</a>
+<span class="k">class</span> <span class="nc">Repeat</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Molang repeat until statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        test (`Node`): Expression to test.</span>
+<span class="sd">        body (`Block`): List of statements to execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Repeat&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">test</span></div>
+
+
+
+<div class="viewcode-block" id="ElseIf">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.ElseIf">[docs]</a>
+<span class="k">class</span> <span class="nc">ElseIf</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the elseif molang statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        test (`Node`): Expression to test.</span>
+<span class="sd">        body (`list&lt;Statement&gt;`): List of statements to execute if test is true.</span>
+<span class="sd">        orelse (`list&lt;Statement&gt; or ElseIf`): List of statements or ElseIf if test if false.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="n">orelse</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;ElseIf&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">:</span> <span class="n">Node</span> <span class="o">=</span> <span class="n">test</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orelse</span> <span class="o">=</span> <span class="n">orelse</span></div>
+
+
+
+<div class="viewcode-block" id="If">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.If">[docs]</a>
+<span class="k">class</span> <span class="nc">If</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Molang if statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        test (`Node`): Expression to test.</span>
+<span class="sd">        body (`Block`): List of statements to execute if test is true.</span>
+<span class="sd">        orelse (`list&lt;Statement&gt; or ElseIf`): List of statements or ElseIf if test if false.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="n">orelse</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Statement</span><span class="p">]</span> <span class="ow">or</span> <span class="n">ElseIf</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;If&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">test</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orelse</span> <span class="o">=</span> <span class="n">orelse</span></div>
+
+
+
+<div class="viewcode-block" id="Label">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Label">[docs]</a>
+<span class="k">class</span> <span class="nc">Label</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the label molang statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        id (`Name`): Label name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_id</span><span class="p">:</span> <span class="n">Name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Label</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Label&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">Name</span> <span class="o">=</span> <span class="n">label_id</span></div>
+
+
+
+<div class="viewcode-block" id="Goto">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Goto">[docs]</a>
+<span class="k">class</span> <span class="nc">Goto</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the goto molang statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        label (`Name`): Label node.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="n">Name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Goto</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Goto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">:</span> <span class="n">Name</span> <span class="o">=</span> <span class="n">label</span></div>
+
+
+
+<div class="viewcode-block" id="SemiColon">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.SemiColon">[docs]</a>
+<span class="k">class</span> <span class="nc">SemiColon</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the semi-colon molang statement.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SemiColon</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;SemiColon&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Break">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Break">[docs]</a>
+<span class="k">class</span> <span class="nc">Break</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the break molang statement.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Break</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Break&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Return">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Return">[docs]</a>
+<span class="k">class</span> <span class="nc">Return</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang return statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        values (`list&lt;Expression&gt;`): Values to return.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Return</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Return&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span></div>
+
+
+
+<div class="viewcode-block" id="Fornum">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Fornum">[docs]</a>
+<span class="k">class</span> <span class="nc">Fornum</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the numeric for molang statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        target (`Name`): Target name.</span>
+<span class="sd">        start (`Expression`): Start index value.</span>
+<span class="sd">        stop (`Expression`): Stop index value.</span>
+<span class="sd">        step (`Expression`): Step value.</span>
+<span class="sd">        body (`Block`): List of statements to execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">Name</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span>
+        <span class="n">stop</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span>
+        <span class="n">step</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Fornum</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Fornum&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">:</span> <span class="n">Name</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span></div>
+
+
+
+<div class="viewcode-block" id="Forin">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Forin">[docs]</a>
+<span class="k">class</span> <span class="nc">Forin</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the for in molang statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        body (`Block`): List of statements to execute.</span>
+<span class="sd">        iter (`list&lt;Expression&gt;`): Iterable expressions.</span>
+<span class="sd">        targets (`list&lt;Name&gt;`): Start index value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="nb">iter</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">],</span> <span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Name</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Forin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Forin&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iter</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">]</span> <span class="o">=</span> <span class="nb">iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Name</span><span class="p">]</span> <span class="o">=</span> <span class="n">targets</span></div>
+
+
+
+<div class="viewcode-block" id="Call">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Call">[docs]</a>
+<span class="k">class</span> <span class="nc">Call</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the function call molang statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        func (`Expression`): Function to call.</span>
+<span class="sd">        args (`list&lt;Expression&gt;`): Function call arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Call</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Call&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span></div>
+
+
+
+<div class="viewcode-block" id="Invoke">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Invoke">[docs]</a>
+<span class="k">class</span> <span class="nc">Invoke</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the invoke function call molang statement (magic syntax with &#39;:&#39;).</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        source (`Expression`): Source expression where function is invoked.</span>
+<span class="sd">        func (`Expression`): Function to call.</span>
+<span class="sd">        args (`list&lt;Expression&gt;`): Function call arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Invoke</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Invoke&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span></div>
+
+
+
+<div class="viewcode-block" id="Function">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Function">[docs]</a>
+<span class="k">class</span> <span class="nc">Function</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang function declaration statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (`Expression`): Function name.</span>
+<span class="sd">        args (`list&lt;Expression&gt;`): Function arguments.</span>
+<span class="sd">        body (`Block`): List of statements to execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">],</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Function&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span></div>
+
+
+
+<div class="viewcode-block" id="LocalFunction">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.LocalFunction">[docs]</a>
+<span class="k">class</span> <span class="nc">LocalFunction</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang local function declaration statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (`Expression`): Function name.</span>
+<span class="sd">        args (`list&lt;Expression&gt;`): Function arguments.</span>
+<span class="sd">        body (`list&lt;Statement&gt;`): List of statements to execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">],</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LocalFunction</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;LocalFunction&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span></div>
+
+
+
+<div class="viewcode-block" id="Method">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Method">[docs]</a>
+<span class="k">class</span> <span class="nc">Method</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang Object Oriented function statement.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        source (`Expression`): Source expression where method is defined.</span>
+<span class="sd">        name (`Expression`): Function name.</span>
+<span class="sd">        args (`list&lt;Expression&gt;`): Function arguments.</span>
+<span class="sd">        body (`Block`): List of statements to execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">],</span>
+        <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Method</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Method&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; Molang Expression                                                          &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; Types and values                                                        &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Nil">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Nil">[docs]</a>
+<span class="k">class</span> <span class="nc">Nil</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang nil expression.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Nil</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Nil&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TrueExpr">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.TrueExpr">[docs]</a>
+<span class="k">class</span> <span class="nc">TrueExpr</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang true expression.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TrueExpr</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FalseExpr">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.FalseExpr">[docs]</a>
+<span class="k">class</span> <span class="nc">FalseExpr</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang false expression.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FalseExpr</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;False&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="n">NumberType</span> <span class="o">=</span> <span class="nb">int</span> <span class="ow">or</span> <span class="nb">float</span>
+
+
+<div class="viewcode-block" id="Number">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Number">[docs]</a>
+<span class="k">class</span> <span class="nc">Number</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang number expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        n (`int|float`): Numeric value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="n">NumberType</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Number</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Number&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span> <span class="n">NumberType</span> <span class="o">=</span> <span class="n">n</span></div>
+
+
+
+<div class="viewcode-block" id="Varargs">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Varargs">[docs]</a>
+<span class="k">class</span> <span class="nc">Varargs</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang Varargs expression (...).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Varargs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Varargs&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="StringDelimiter">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.StringDelimiter">[docs]</a>
+<span class="k">class</span> <span class="nc">StringDelimiter</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">SINGLE_QUOTE</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># &#39;foo&#39;</span>
+    <span class="n">DOUBLE_QUOTE</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># &quot;foo&quot;</span>
+    <span class="n">DOUBLE_SQUARE</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># [[foo]]</span></div>
+
+
+
+<div class="viewcode-block" id="String">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.String">[docs]</a>
+<span class="k">class</span> <span class="nc">String</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang string expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        s (`string`): String value.</span>
+<span class="sd">        delimiter (`StringDelimiter`): The string delimiter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">delimiter</span><span class="p">:</span> <span class="n">StringDelimiter</span> <span class="o">=</span> <span class="n">StringDelimiter</span><span class="o">.</span><span class="n">SINGLE_QUOTE</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;String&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span><span class="p">:</span> <span class="n">StringDelimiter</span> <span class="o">=</span> <span class="n">delimiter</span></div>
+
+
+
+<div class="viewcode-block" id="Field">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Field">[docs]</a>
+<span class="k">class</span> <span class="nc">Field</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define a molang table field expression</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        key (`Expression`): Key.</span>
+<span class="sd">        value (`Expression`): Value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span>
+        <span class="n">between_brackets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Field&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">between_brackets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">between_brackets</span></div>
+
+
+
+<div class="viewcode-block" id="Table">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Table">[docs]</a>
+<span class="k">class</span> <span class="nc">Table</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang table expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        fields (`list&lt;Field&gt;`): Table fields.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Field</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Table&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Field</span><span class="p">]</span> <span class="o">=</span> <span class="n">fields</span></div>
+
+
+
+<div class="viewcode-block" id="Dots">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Dots">[docs]</a>
+<span class="k">class</span> <span class="nc">Dots</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang dots (...) expression.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Dots&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="AnonymousFunction">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.AnonymousFunction">[docs]</a>
+<span class="k">class</span> <span class="nc">AnonymousFunction</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the Molang anonymous function expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        args (`list&lt;Expression&gt;`): Function arguments.</span>
+<span class="sd">        body (`Block`): List of statements to execute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">],</span> <span class="n">body</span><span class="p">:</span> <span class="n">Block</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AnonymousFunction</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;AnonymousFunction&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Expression</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">:</span> <span class="n">Block</span> <span class="o">=</span> <span class="n">body</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; Operators                                                               &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Op">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Op">[docs]</a>
+<span class="k">class</span> <span class="nc">Op</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Molang operators.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="BinaryOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.BinaryOp">[docs]</a>
+<span class="k">class</span> <span class="nc">BinaryOp</span><span class="p">(</span><span class="n">Op</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Molang &#39;Left Op Right&#39; Operators.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BinaryOp</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">left</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="p">:</span> <span class="n">Expression</span> <span class="o">=</span> <span class="n">right</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; 3.4.1 – Arithmetic Operators                                            &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="AriOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.AriOp">[docs]</a>
+<span class="k">class</span> <span class="nc">AriOp</span><span class="p">(</span><span class="n">BinaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Arithmetic Operators&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="AddOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.AddOp">[docs]</a>
+<span class="k">class</span> <span class="nc">AddOp</span><span class="p">(</span><span class="n">AriOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;AddOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="SubOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.SubOp">[docs]</a>
+<span class="k">class</span> <span class="nc">SubOp</span><span class="p">(</span><span class="n">AriOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Substract expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;SubOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MultOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.MultOp">[docs]</a>
+<span class="k">class</span> <span class="nc">MultOp</span><span class="p">(</span><span class="n">AriOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multiplication expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;MultOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FloatDivOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.FloatDivOp">[docs]</a>
+<span class="k">class</span> <span class="nc">FloatDivOp</span><span class="p">(</span><span class="n">AriOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Float division expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;FloatDivOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FloorDivOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.FloorDivOp">[docs]</a>
+<span class="k">class</span> <span class="nc">FloorDivOp</span><span class="p">(</span><span class="n">AriOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Floor division expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;FloorDivOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ModOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.ModOp">[docs]</a>
+<span class="k">class</span> <span class="nc">ModOp</span><span class="p">(</span><span class="n">AriOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modulo expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;ModOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ExpoOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.ExpoOp">[docs]</a>
+<span class="k">class</span> <span class="nc">ExpoOp</span><span class="p">(</span><span class="n">AriOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exponent expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;ExpoOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; 3.4.2 – Bitwise Operators                                               &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="BitOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.BitOp">[docs]</a>
+<span class="k">class</span> <span class="nc">BitOp</span><span class="p">(</span><span class="n">BinaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for bitwise Operators.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="BAndOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.BAndOp">[docs]</a>
+<span class="k">class</span> <span class="nc">BAndOp</span><span class="p">(</span><span class="n">BitOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bitwise and expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;BAndOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="BOrOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.BOrOp">[docs]</a>
+<span class="k">class</span> <span class="nc">BOrOp</span><span class="p">(</span><span class="n">BitOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bitwise or expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;BOrOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="BXorOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.BXorOp">[docs]</a>
+<span class="k">class</span> <span class="nc">BXorOp</span><span class="p">(</span><span class="n">BitOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bitwise xor expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;BXorOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="BShiftROp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.BShiftROp">[docs]</a>
+<span class="k">class</span> <span class="nc">BShiftROp</span><span class="p">(</span><span class="n">BitOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bitwise right shift expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;BShiftROp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="BShiftLOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.BShiftLOp">[docs]</a>
+<span class="k">class</span> <span class="nc">BShiftLOp</span><span class="p">(</span><span class="n">BitOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bitwise left shift expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;BShiftLOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; 3.4.4 – Relational Operators                                            &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="RelOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.RelOp">[docs]</a>
+<span class="k">class</span> <span class="nc">RelOp</span><span class="p">(</span><span class="n">BinaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Molang relational operators.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="LessThanOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.LessThanOp">[docs]</a>
+<span class="k">class</span> <span class="nc">LessThanOp</span><span class="p">(</span><span class="n">RelOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Less than expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;RLtOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GreaterThanOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.GreaterThanOp">[docs]</a>
+<span class="k">class</span> <span class="nc">GreaterThanOp</span><span class="p">(</span><span class="n">RelOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Greater than expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;RGtOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LessOrEqThanOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.LessOrEqThanOp">[docs]</a>
+<span class="k">class</span> <span class="nc">LessOrEqThanOp</span><span class="p">(</span><span class="n">RelOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Less or equal expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;RLtEqOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GreaterOrEqThanOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.GreaterOrEqThanOp">[docs]</a>
+<span class="k">class</span> <span class="nc">GreaterOrEqThanOp</span><span class="p">(</span><span class="n">RelOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Greater or equal expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;RGtEqOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="EqToOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.EqToOp">[docs]</a>
+<span class="k">class</span> <span class="nc">EqToOp</span><span class="p">(</span><span class="n">RelOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Equal to expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;REqOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="NotEqToOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.NotEqToOp">[docs]</a>
+<span class="k">class</span> <span class="nc">NotEqToOp</span><span class="p">(</span><span class="n">RelOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Not equal to expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;RNotEqOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; 3.4.5 – Logical Operators                                               &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="LoOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.LoOp">[docs]</a>
+<span class="k">class</span> <span class="nc">LoOp</span><span class="p">(</span><span class="n">BinaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for logical operators.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="AndLoOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.AndLoOp">[docs]</a>
+<span class="k">class</span> <span class="nc">AndLoOp</span><span class="p">(</span><span class="n">LoOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Logical and expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;LAndOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="OrLoOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.OrLoOp">[docs]</a>
+<span class="k">class</span> <span class="nc">OrLoOp</span><span class="p">(</span><span class="n">LoOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Logical or expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;LOrOp&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; 3.4.6 Concat operators                                                  &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Concat">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.Concat">[docs]</a>
+<span class="k">class</span> <span class="nc">Concat</span><span class="p">(</span><span class="n">BinaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concat expression.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        left (`Expression`): Left expression.</span>
+<span class="sd">        right (`Expression`): Right expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Concat&quot;</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; Unary operators                                                         &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="UnaryOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.UnaryOp">[docs]</a>
+<span class="k">class</span> <span class="nc">UnaryOp</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Molang unitary operator.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        operand (`Expression`): Operand.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">operand</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operand</span> <span class="o">=</span> <span class="n">operand</span></div>
+
+
+
+<div class="viewcode-block" id="UMinusOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.UMinusOp">[docs]</a>
+<span class="k">class</span> <span class="nc">UMinusOp</span><span class="p">(</span><span class="n">UnaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Molang minus unitary operator.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        operand (`Expression`): Operand.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operand</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;UMinusOp&quot;</span><span class="p">,</span> <span class="n">operand</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="UBNotOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.UBNotOp">[docs]</a>
+<span class="k">class</span> <span class="nc">UBNotOp</span><span class="p">(</span><span class="n">UnaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Molang binary not unitary operator.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        operand (`Expression`): Operand.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operand</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;UBNotOp&quot;</span><span class="p">,</span> <span class="n">operand</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ULNotOp">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.ULNotOp">[docs]</a>
+<span class="k">class</span> <span class="nc">ULNotOp</span><span class="p">(</span><span class="n">UnaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Logical not operator.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        operand (`Expression`): Operand.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operand</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;ULNotOp&quot;</span><span class="p">,</span> <span class="n">operand</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; 3.4.7 – The Length Operator                                             &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot; ----------------------------------------------------------------------- &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ULengthOP">
+<a class="viewcode-back" href="../../molang.html#molang.astnodes.ULengthOP">[docs]</a>
+<span class="k">class</span> <span class="nc">ULengthOP</span><span class="p">(</span><span class="n">UnaryOp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Length operator.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operand</span><span class="p">:</span> <span class="n">Expression</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;ULengthOp&quot;</span><span class="p">,</span> <span class="n">operand</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Legopitstop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
