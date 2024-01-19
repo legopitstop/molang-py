@@ -4,11 +4,11 @@ import os
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
     long_description = f.read()
 
-required_modules = ['ast']
+required_modules = []
 
 setuptools.setup(
     name='molang',
-    version='0.0.1',
+    version='0.0.2',
     author='Legopitstop',
     description='Molang to Python Translator & interpreter written in pure Python.',
     long_description=long_description,
