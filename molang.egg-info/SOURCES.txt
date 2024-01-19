@@ -9,5 +9,4 @@ molang.egg-info/PKG-INFO
 molang.egg-info/SOURCES.txt
 molang.egg-info/dependency_links.txt
 molang.egg-info/entry_points.txt
-molang.egg-info/requires.txt
 molang.egg-info/top_level.txt

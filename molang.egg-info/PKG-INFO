@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: molang
-Version: 0.0.1
+Version: 0.0.2
 Summary: Molang to Python Translator & interpreter written in pure Python.
 Home-page: https://github.com/legopitstop/molang
 Author: Legopitstop
