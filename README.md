@@ -4,11 +4,10 @@
 [![Python](https://img.shields.io/pypi/pyversions/molang)](https://www.python.org/downloads//)
 ![Downloads](https://img.shields.io/pypi/dm/molang)
 ![Status](https://img.shields.io/pypi/status/molang)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![Issues](https://img.shields.io/github/issues/legopitstop/molang)](https://github.com/legopitstop/molang/issues)
 
 Molang to Python Translator & interpreter written in pure Python.
-
-Documentation: https://molang.readthedocs.io/
 
 ## Installation
 
@@ -19,6 +18,12 @@ pip3 install molang
 ```
 
 Update existing installation: `pip3 install molang --upgrade`
+
+## Requirements
+
+| Name                                             | Description                             |
+| ------------------------------------------------ | --------------------------------------- |
+| [`pydantic`](https://pypi.org/project/pydantic/) | Data validation using Python type hints |
 
 ## Features
 
