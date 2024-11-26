@@ -1,2 +1,0 @@
-[console_scripts]
-molang = molang.cli:main
