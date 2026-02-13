@@ -65,14 +65,14 @@ print(molang.eval(expr, ctx))  # prints 13.0
 ### DSL usage
 
 ```python
-from molang.dsl import variable, math
+from molang.dsl import variable, math, query
 
 variable.x = 4
-print(variable.x)           # Expr("variable.x = 4;") when used as assignment
+print(variable.x)           # MolangExpr("variable.x = 4;") when used as assignment
 print(math.sqrt(variable.x))
 
 expr = query.block_state("minecraft:cardinal_direction") == "north"
-print(expr) # Expr("query.block_state('minecraft:cardinal_direction') == 'north'")
+print(expr) # MolangExpr("query.block_state('minecraft:cardinal_direction') == 'north'")
 ```
 
 ### Assignment to dotted variables
@@ -92,6 +92,19 @@ import molang
 
 ctx = molang.create_context()
 print(molang.eval('math.lerp(0, 10, 0.5)', ctx))  # 5.0
+```
+
+### Pydantic Support
+
+```python
+from pydantic import BaseModel
+from molang.dsl import MolangExpr, query
+
+class Test(BaseModel):
+  condition: MolangExpr
+
+x = Test(condition=query.block_state("facing") == "north")
+print(x.model_dump()) # {"condition": "query.block_state('facing') == 'north'"}
 ```
 
 ## Command-line interface
