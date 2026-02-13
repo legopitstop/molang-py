@@ -1,14 +1,10 @@
 [build-system]
 requires = ["setuptools>=42.0", "wheel"]
 build-backend = "setuptools.build_meta"
-<<<<<<< HEAD
-=======
 
 [tool.pytest.ini_options]
-addopts="--cov=molang"
-testpaths=[
-    "tests",
-]
+addopts = "--cov=molang"
+testpaths = ["tests"]
 
 [tool.mypy]
 mypy_path = "molang"
@@ -23,4 +19,3 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 no_implicit_reexport = true
->>>>>>> 0eb694caf56218f8ed66b7580d18bf04ccd26629

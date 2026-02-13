@@ -21,18 +21,16 @@ pip3 install molang
 
 Update existing installation: `pip3 install molang --upgrade`
 
-<<<<<<< HEAD
 ## Links
 
 - [Documentation](https://docs.lpsmods.dev/molang)
 - [Source Code](https://github.com/legopitstop/molang)
-=======
+
 ## Requirements
 
 | Name                                             | Description                             |
 | ------------------------------------------------ | --------------------------------------- |
 | [`pydantic`](https://pypi.org/project/pydantic/) | Data validation using Python type hints |
->>>>>>> 0eb694caf56218f8ed66b7580d18bf04ccd26629
 
 ## Features
 

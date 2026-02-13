@@ -2,7 +2,7 @@ __all__ = ["Parser"]
 
 import re
 from ..dsl import MolangExpr
-from .ast import Ternary, Binary, Unary, Number, Variable, Assign, Call
+from .ast import Ternary, Binary, Unary, Number, Variable, Assign, Call, Node
 from .tokenizer import tokenize
 
 
@@ -21,10 +21,10 @@ class Parser:
         self.pos += 1
         return token
 
-    def parse(self):
+    def parse(self) -> Node:
         return self.parse_assignment()
 
-    def parse_assignment(self):
+    def parse_assignment(self) -> Node:
         expr = self.parse_ternary()
         if self.peek() == "=":
             self.consume("=")
@@ -34,7 +34,7 @@ class Parser:
             return Assign(expr, right)
         return expr
 
-    def parse_ternary(self):
+    def parse_ternary(self) -> Node:
         expr = self.parse_or()
         if self.peek() == "?":
             self.consume("?")
@@ -44,7 +44,7 @@ class Parser:
             return Ternary(expr, true, false)
         return expr
 
-    def parse_or(self):
+    def parse_or(self) -> Node:
         expr = self.parse_and()
         while self.peek() == "||":
             op = self.consume()
@@ -52,7 +52,7 @@ class Parser:
             expr = Binary(expr, op, right)
         return expr
 
-    def parse_and(self):
+    def parse_and(self) -> Node:
         expr = self.parse_equality()
         while self.peek() == "&&":
             op = self.consume()
@@ -60,7 +60,7 @@ class Parser:
             expr = Binary(expr, op, right)
         return expr
 
-    def parse_equality(self):
+    def parse_equality(self) -> Node:
         expr = self.parse_comparison()
         while self.peek() in ("==", "!="):
             op = self.consume()
@@ -68,7 +68,7 @@ class Parser:
             expr = Binary(expr, op, right)
         return expr
 
-    def parse_comparison(self):
+    def parse_comparison(self) -> Node:
         expr = self.parse_term()
         while self.peek() in (">", "<", ">=", "<="):
             op = self.consume()
@@ -76,7 +76,7 @@ class Parser:
             expr = Binary(expr, op, right)
         return expr
 
-    def parse_term(self):
+    def parse_term(self) -> Node:
         expr = self.parse_factor()
         while self.peek() in ("+", "-"):
             op = self.consume()
@@ -84,7 +84,7 @@ class Parser:
             expr = Binary(expr, op, right)
         return expr
 
-    def parse_factor(self):
+    def parse_factor(self) -> Node:
         expr = self.parse_unary()
         while self.peek() in ("*", "/"):
             op = self.consume()
@@ -92,13 +92,13 @@ class Parser:
             expr = Binary(expr, op, right)
         return expr
 
-    def parse_unary(self):
+    def parse_unary(self) -> Node:
         if self.peek() in ("!", "-"):
             op = self.consume()
             return Unary(op, self.parse_unary())
         return self.parse_primary()
 
-    def parse_primary(self):
+    def parse_primary(self) -> Node:
         token = self.peek()
 
         if token is None:
@@ -132,6 +132,6 @@ class Parser:
         return var
 
 
-def parse_expression(expr: str | MolangExpr):
+def parse_expression(expr: str | MolangExpr) -> Node:
     tokens = tokenize(expr)
     return Parser(tokens).parse()
