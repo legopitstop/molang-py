@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+__version__ = "1.0.0"
+
+from .core.context import *
+from .core.ast import *
+from .core.base import *
+=======
 from typing import Self, Callable, Type, Any
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
@@ -185,3 +192,4 @@ def run(fn: str, text: str):
 def run_file(fp: str):
     with open(fp, "r") as fd:
         run(os.path.basename(fp), fd.read())
+>>>>>>> 0eb694caf56218f8ed66b7580d18bf04ccd26629

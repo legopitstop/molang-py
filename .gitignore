@@ -1,6 +1,9 @@
+<<<<<<< HEAD
+=======
 debug.bat
 SETUP.bat
 
+>>>>>>> 0eb694caf56218f8ed66b7580d18bf04ccd26629
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

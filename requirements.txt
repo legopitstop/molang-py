@@ -1,1 +1,5 @@
+<<<<<<< HEAD
+pydantic==2.11.4
+=======
 pydantic==2.10.1
+>>>>>>> 0eb694caf56218f8ed66b7580d18bf04ccd26629
