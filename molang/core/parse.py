@@ -2,7 +2,7 @@ __all__ = ["Parser"]
 
 import re
 from ..dsl import MolangExpr
-from .ast import Ternary, Binary, Unary, Number, Variable, Assign, Call, Node
+from .ast import Ternary, Binary, Unary, Number, String, Variable, Assign, Call, Node
 from .tokenizer import tokenize
 
 
@@ -113,6 +113,10 @@ class Parser:
         if re.match(r"\d", token):
             self.consume()
             return Number(token)
+
+        if token[0] in ("'", '"'):
+            self.consume()
+            return String(token)
 
         self.consume()
         var = Variable(token)

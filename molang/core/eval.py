@@ -1,11 +1,14 @@
 __all__ = ["evaluate"]
 
-from .ast import Number, Variable, Unary, Binary, Ternary, Assign, Call
+from .ast import Number, String, Variable, Unary, Binary, Ternary, Assign, Call
 from .utils import alias
 
 
 def evaluate(node, context):
     if isinstance(node, Number):
+        return node.value
+
+    if isinstance(node, String):
         return node.value
 
     if isinstance(node, Variable):
@@ -63,20 +66,30 @@ def evaluate(node, context):
         right = evaluate(node.right, context)
 
         try:
-            return {
-                "+": left + right,
-                "-": left - right,
-                "*": left * right,
-                "/": left / right,
-                "&&": left and right,
-                "||": left or right,
-                "==": left == right,
-                "!=": left != right,
-                ">": left > right,
-                "<": left < right,
-                ">=": left >= right,
-                "<=": left <= right,
-            }[node.op]
+            if node.op == "+":
+                return left + right
+            if node.op == "-":
+                return left - right
+            if node.op == "*":
+                return left * right
+            if node.op == "/":
+                return left / right
+            if node.op == "&&":
+                return left and right
+            if node.op == "||":
+                return left or right
+            if node.op == "==":
+                return left == right
+            if node.op == "!=":
+                return left != right
+            if node.op == ">":
+                return left > right
+            if node.op == "<":
+                return left < right
+            if node.op == ">=":
+                return left >= right
+            if node.op == "<=":
+                return left <= right
         except ZeroDivisionError:
             return 0
 
