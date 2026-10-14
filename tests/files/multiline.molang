@@ -1,0 +1,7 @@
+t.RANDOMISE_SE_WALLS ? {
+  t.WALL_SOUTH = math.random_integer(1,5)<3;
+  t.WALL_EAST = math.random_integer(1,5)<3;  
+}:{
+  t.WALL_SOUTH = 0;
+  t.WALL_EAST = 0;
+};

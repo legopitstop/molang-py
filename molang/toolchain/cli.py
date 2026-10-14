@@ -34,8 +34,7 @@ def main() -> Any:
         return f"molang {molang.__version__}"
 
     if args.file:
-        with open(args.file) as fd:
-            result = molang.eval(fd.read())
+        result = molang.eval_file(args.file)
         return str(result)
 
     if args.cmd:

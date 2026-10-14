@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - MolangExpr is now hashable.
 - Added support for string literals (Thanks to @sonu7089)
 
+### New
+
+- Added `parse_file` function
+- Added `compile_file` function
+- Added `eval_file` function
+
 ## [1.0.1] - 2/12/2026
 
 ### Fixes
