@@ -1,4 +1,20 @@
+from typing import Any
 from molang import eval, create_context
+
+
+def block_state(name: str) -> Any:
+    return "north"
+
+
+ctx = create_context()
+ctx['query']['block_state'] = block_state
+
+
+def test_eval_custom_query():
+    a = eval("query.block_state('facing')=='north'", ctx)
+    b = eval("query.block_state('facing')=='south'", ctx)
+    assert a
+    assert not b
 
 
 def test_eval_query():
@@ -6,6 +22,15 @@ def test_eval_query():
     b = eval("query.health", {"query": {"health": 100}})
     assert a == 0
     assert b == 100
+
+
+def test_eval_string():
+    a = eval("'hello world'")
+    b = eval("\"hello world\"")
+    c = eval("'5'")
+    assert a == "hello world"
+    assert b == "hello world"
+    assert c == "5"
 
 
 def test_eval_integer():
