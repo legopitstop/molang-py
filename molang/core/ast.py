@@ -1,4 +1,4 @@
-__all__ = ["Node", "Number", "Variable", "Unary", "Binary", "Ternary", "Assign", "Call"]
+__all__ = ["Node", "Number", "String", "Variable", "Unary", "Binary", "Ternary", "Assign", "Call"]
 
 
 class Node:
@@ -8,6 +8,18 @@ class Node:
 class Number(Node):
     def __init__(self, value):
         self.value = float(value)
+
+
+class String(Node):
+    def __init__(self, value):
+        text = str(value)
+        if len(text) >= 2 and text[0] in ("'", '"') and text[-1] == text[0]:
+            inner = text[1:-1]
+        else:
+            inner = text
+        # Basic unescape for quotes and backslash
+        inner = inner.replace("\\'", "'").replace('\\"', '"').replace("\\\\", "\\")
+        self.value = inner
 
 
 class Variable(Node):

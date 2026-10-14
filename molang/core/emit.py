@@ -1,12 +1,16 @@
 __all__ = ["to_molang"]
 
-from .ast import Number, Variable, Unary, Binary, Ternary, Assign, Call, Node
+from .ast import Number, String, Variable, Unary, Binary, Ternary, Assign, Call, Node
 from .utils import alias
 
 
 def to_molang(node: Node, minify: bool = False) -> str:
     if isinstance(node, Number):
         return str(node.value)
+
+    if isinstance(node, String):
+        escaped = node.value.replace("\\", "\\\\").replace("'", "\\'")
+        return f"'{escaped}'"
 
     if isinstance(node, Variable):
         return alias(node.name)

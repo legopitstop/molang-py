@@ -8,7 +8,9 @@ TOKEN_REGEX = re.compile(
     r"""
     \s*
     (
-        \d+(\.\d+)? |
+        '(?:[^'\\]|\\.)*' |
+        "(?:[^\"\\]|\\.)*" |
+        \d+(?:\.\d+)? |
         [A-Za-z_][A-Za-z0-9_\.]* |
         &&|\|\||==|!=|>=|<=|
         [+\-*/()?:<>!;=,]
@@ -20,4 +22,8 @@ TOKEN_REGEX = re.compile(
 
 def tokenize(text: str | MolangExpr) -> List[str]:
     tokens = TOKEN_REGEX.findall(str(text))
-    return [t[0] for t in tokens]
+    # findall returns list[str] when only one group is present,
+    # but keep compat if regex ever gains inner groups.
+    if tokens and isinstance(tokens[0], tuple):
+        return [t[0] for t in tokens]
+    return list(tokens)
