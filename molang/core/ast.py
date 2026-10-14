@@ -2,7 +2,9 @@ __all__ = ["Assign", "Binary", "Call", "Node", "Number", "String", "Ternary", "U
 
 
 class Node:
-    pass
+    def __str__(self) -> str:
+        from .emit import to_molang
+        return to_molang(self)
 
 
 class Number(Node):
