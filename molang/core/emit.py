@@ -1,13 +1,27 @@
 __all__ = ["to_molang"]
 
-from .ast import Assign, Binary, Block, Call, Node, Number, Program, String, Ternary, Unary, Variable
+from .ast import (
+    Assign,
+    Binary,
+    Block,
+    Call,
+    Node,
+    Number,
+    Program,
+    String,
+    Ternary,
+    Unary,
+    Variable,
+)
 from .utils import alias
 
 
 def to_molang(node: Node, minify: bool = False) -> str:
     if isinstance(node, Program):
         separator = "" if minify else " "
-        source = separator.join(to_molang(statement, minify) + ";" for statement in node.statements)
+        source = separator.join(
+            to_molang(statement, minify) + ";" for statement in node.statements
+        )
         return "{" + source + "}" if isinstance(node, Block) else source
 
     if isinstance(node, Number):

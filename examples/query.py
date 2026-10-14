@@ -10,5 +10,5 @@ def block_state(name: str) -> Any:
 
 
 ctx = molang.create_context()
-ctx['query']['block_state'] = block_state
+ctx["query"]["block_state"] = block_state
 print(molang.eval(expr, ctx))

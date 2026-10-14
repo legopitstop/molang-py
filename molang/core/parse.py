@@ -3,7 +3,19 @@ __all__ = ["Parser"]
 import re
 
 from ..dsl import MolangExpr
-from .ast import Assign, Binary, Block, Call, Node, Number, Program, String, Ternary, Unary, Variable
+from .ast import (
+    Assign,
+    Binary,
+    Block,
+    Call,
+    Node,
+    Number,
+    Program,
+    String,
+    Ternary,
+    Unary,
+    Variable,
+)
 from .tokenizer import tokenize
 
 
@@ -128,7 +140,10 @@ class Parser:
             self.consume("}")
             return Block(statements)
 
-        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*|\d+(?:\.\d+)?|'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"", token):
+        if not re.fullmatch(
+            r"[A-Za-z_][A-Za-z0-9_.]*|\d+(?:\.\d+)?|'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"",
+            token,
+        ):
             raise SyntaxError(f"Unexpected token {token}")
 
         if re.match(r"\d", token):

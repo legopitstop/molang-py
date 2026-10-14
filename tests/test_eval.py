@@ -8,7 +8,7 @@ def block_state(name: str) -> Any:
 
 
 ctx = create_context()
-ctx['query']['block_state'] = block_state
+ctx["query"]["block_state"] = block_state
 
 
 def test_eval_custom_query():
@@ -27,7 +27,7 @@ def test_eval_query():
 
 def test_eval_string():
     a = eval("'hello world'")
-    b = eval("\"hello world\"")
+    b = eval('"hello world"')
     c = eval("'5'")
     assert a == "hello world"
     assert b == "hello world"

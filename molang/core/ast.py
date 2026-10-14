@@ -1,9 +1,22 @@
-__all__ = ["Assign", "Binary", "Block", "Call", "Node", "Number", "Program", "String", "Ternary", "Unary", "Variable"]
+__all__ = [
+    "Assign",
+    "Binary",
+    "Block",
+    "Call",
+    "Node",
+    "Number",
+    "Program",
+    "String",
+    "Ternary",
+    "Unary",
+    "Variable",
+]
 
 
 class Node:
     def __str__(self) -> str:
         from .emit import to_molang
+
         return to_molang(self)
 
 

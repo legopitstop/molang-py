@@ -1,6 +1,17 @@
 import pytest
 
-from molang import Block, Program, Ternary, compile, compile_file, create_context, eval, eval_file, parse, parse_file
+from molang import (
+    Block,
+    Program,
+    Ternary,
+    compile,
+    compile_file,
+    create_context,
+    eval,
+    eval_file,
+    parse,
+    parse_file,
+)
 
 
 WALLS = """
@@ -87,10 +98,17 @@ def test_nested_and_empty_blocks():
     assert eval("5 +\n5;") == 10
 
 
-@pytest.mark.parametrize("source", [
-    "{t.x = 1;", "t.x = 1; }", "t.x = 1 t.y = 2;",
-    "1 ? {t.x = 1;} :", "{t.x = ;}", "5 @ 5",
-])
+@pytest.mark.parametrize(
+    "source",
+    [
+        "{t.x = 1;",
+        "t.x = 1; }",
+        "t.x = 1 t.y = 2;",
+        "1 ? {t.x = 1;} :",
+        "{t.x = ;}",
+        "5 @ 5",
+    ],
+)
 def test_invalid_multiline_source(source):
     with pytest.raises(SyntaxError):
         parse(source)
