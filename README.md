@@ -62,6 +62,29 @@ ctx['variable']['x'] = 9
 print(molang.eval(expr, ctx))  # prints 13.0
 ```
 
+### Multiline expressions and blocks
+
+Use semicolons to separate statements and braces to group statements in a
+conditional branch. Newlines and indentation are treated as whitespace.
+
+```python
+ctx = molang.create_context()
+ctx["temp"]["RANDOMISE_SE_WALLS"] = True
+molang.eval("""
+t.RANDOMISE_SE_WALLS ? {
+  t.WALL_SOUTH = math.random_integer(1, 5) < 3;
+  t.WALL_EAST = math.random_integer(1, 5) < 3;
+} : {
+  t.WALL_SOUTH = 0;
+  t.WALL_EAST = 0;
+};
+""", ctx)
+```
+
+Only the selected branch executes. Statements execute in order, returning the
+last statement's value (or zero for an empty block). The same syntax works with
+`parse`, `compile`, and their file helpers.
+
 ### DSL usage
 
 ```python

@@ -1,10 +1,16 @@
 __all__ = ["evaluate"]
 
-from .ast import Assign, Binary, Call, Number, String, Ternary, Unary, Variable
+from .ast import Assign, Binary, Call, Number, Program, String, Ternary, Unary, Variable
 from .utils import alias
 
 
 def evaluate(node, context):
+    if isinstance(node, Program):
+        result = 0
+        for statement in node.statements:
+            result = evaluate(statement, context)
+        return result
+
     if isinstance(node, Number):
         return node.value
 

@@ -13,7 +13,7 @@ TOKEN_REGEX = re.compile(
         \d+(?:\.\d+)? |
         [A-Za-z_][A-Za-z0-9_\.]* |
         &&|\|\||==|!=|>=|<=|
-        [+\-*/()?:<>!;=,]
+        [+\-*/(){}?:<>!;=,]
         )
     """,
     re.VERBOSE,
@@ -21,9 +21,15 @@ TOKEN_REGEX = re.compile(
 
 
 def tokenize(text: str | MolangExpr) -> list[str]:
-    tokens = TOKEN_REGEX.findall(str(text))
-    # findall returns list[str] when only one group is present,
-    # but keep compat if regex ever gains inner groups.
-    if tokens and isinstance(tokens[0], tuple):
-        return [t[0] for t in tokens]
-    return list(tokens)
+    source = str(text)
+    tokens = []
+    pos = 0
+    while pos < len(source):
+        match = TOKEN_REGEX.match(source, pos)
+        if match is None:
+            if not source[pos:].strip():
+                break
+            raise SyntaxError(f"Unexpected character at position {pos}")
+        tokens.append(match.group(1))
+        pos = match.end()
+    return tokens

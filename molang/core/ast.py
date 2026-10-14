@@ -1,10 +1,19 @@
-__all__ = ["Assign", "Binary", "Call", "Node", "Number", "String", "Ternary", "Unary", "Variable"]
+__all__ = ["Assign", "Binary", "Block", "Call", "Node", "Number", "Program", "String", "Ternary", "Unary", "Variable"]
 
 
 class Node:
     def __str__(self) -> str:
         from .emit import to_molang
         return to_molang(self)
+
+
+class Program(Node):
+    def __init__(self, statements: list[Node]):
+        self.statements = statements
+
+
+class Block(Program):
+    pass
 
 
 class Number(Node):

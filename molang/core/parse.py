@@ -3,7 +3,7 @@ __all__ = ["Parser"]
 import re
 
 from ..dsl import MolangExpr
-from .ast import Assign, Binary, Call, Node, Number, String, Ternary, Unary, Variable
+from .ast import Assign, Binary, Block, Call, Node, Number, Program, String, Ternary, Unary, Variable
 from .tokenizer import tokenize
 
 
@@ -23,15 +23,26 @@ class Parser:
         return token
 
     def parse(self) -> Node:
-        return self.parse_assignment()
+        statements = self.parse_statements()
+        if not statements:
+            raise SyntaxError("Unexpected end")
+        return statements[0] if len(statements) == 1 else Program(statements)
+
+    def parse_statements(self, end=None) -> list[Node]:
+        statements = []
+        while self.peek() is not None and self.peek() != end:
+            statements.append(self.parse_assignment())
+            if self.peek() == ";":
+                self.consume(";")
+            elif self.peek() is not None and self.peek() != end:
+                raise SyntaxError(f"Expected ;, got {self.peek()}")
+        return statements
 
     def parse_assignment(self) -> Node:
         expr = self.parse_ternary()
         if self.peek() == "=":
             self.consume("=")
-            right = self.parse_ternary()
-            if self.peek() == ";":
-                self.consume(";")
+            right = self.parse_assignment()
             return Assign(expr, right)
         return expr
 
@@ -39,9 +50,9 @@ class Parser:
         expr = self.parse_or()
         if self.peek() == "?":
             self.consume("?")
-            true = self.parse_ternary()
+            true = self.parse_assignment()
             self.consume(":")
-            false = self.parse_ternary()
+            false = self.parse_assignment()
             return Ternary(expr, true, false)
         return expr
 
@@ -107,9 +118,18 @@ class Parser:
 
         if token == "(":
             self.consume("(")
-            expr = self.parse_ternary()
+            expr = self.parse_assignment()
             self.consume(")")
             return expr
+
+        if token == "{":
+            self.consume("{")
+            statements = self.parse_statements("}")
+            self.consume("}")
+            return Block(statements)
+
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*|\d+(?:\.\d+)?|'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"", token):
+            raise SyntaxError(f"Unexpected token {token}")
 
         if re.match(r"\d", token):
             self.consume()
