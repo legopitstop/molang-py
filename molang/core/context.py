@@ -1,6 +1,6 @@
 __all__ = ["create_context"]
 
-from typing import Dict, Any
+from typing import Any
 import math
 import random as _random
 
@@ -269,7 +269,7 @@ def _die_roll_integer(num: int, low: int, high: int) -> float:
     return sum(_random.randint(low, high) for _ in range(num)) / num
 
 
-def create_context() -> Dict[str, Any]:
+def create_context() -> dict[str, Any]:
     return {
         "context": {},
         "query": {},

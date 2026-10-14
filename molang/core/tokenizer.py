@@ -1,7 +1,6 @@
 __all__ = ["tokenize"]
 
 import re
-from typing import List
 from ..dsl import MolangExpr
 
 TOKEN_REGEX = re.compile(
@@ -20,7 +19,7 @@ TOKEN_REGEX = re.compile(
 )
 
 
-def tokenize(text: str | MolangExpr) -> List[str]:
+def tokenize(text: str | MolangExpr) -> list[str]:
     tokens = TOKEN_REGEX.findall(str(text))
     # findall returns list[str] when only one group is present,
     # but keep compat if regex ever gains inner groups.
