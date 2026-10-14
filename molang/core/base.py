@@ -1,6 +1,6 @@
 __all__ = ["compile", "eval", "parse"]
 
-from typing import Any, Optional
+from typing import Any
 
 from ..dsl import MolangExpr
 from .ast import Node
@@ -18,5 +18,5 @@ def compile(expr: str | MolangExpr, minify: bool = False) -> str:
     return to_molang(parse_expression(expr), minify)
 
 
-def eval(expr: str | MolangExpr, context: Optional[dict[str, Any]] = None) -> Any:
+def eval(expr: str | MolangExpr, context: dict[str, Any] | None = None) -> Any:
     return evaluate(parse_expression(expr), context or create_context())
