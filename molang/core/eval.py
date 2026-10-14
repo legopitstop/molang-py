@@ -1,6 +1,6 @@
 __all__ = ["evaluate"]
 
-from .ast import Number, String, Variable, Unary, Binary, Ternary, Assign, Call
+from .ast import Assign, Binary, Call, Number, String, Ternary, Unary, Variable
 from .utils import alias
 
 

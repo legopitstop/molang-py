@@ -1,8 +1,9 @@
 __all__ = ["Parser"]
 
 import re
+
 from ..dsl import MolangExpr
-from .ast import Ternary, Binary, Unary, Number, String, Variable, Assign, Call, Node
+from .ast import Assign, Binary, Call, Node, Number, String, Ternary, Unary, Variable
 from .tokenizer import tokenize
 
 

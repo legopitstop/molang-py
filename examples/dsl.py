@@ -1,4 +1,4 @@
-from molang.dsl import variable, query
+from molang.dsl import query, variable
 
 variable.x = 4
 print(variable.x)

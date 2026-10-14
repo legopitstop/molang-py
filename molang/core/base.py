@@ -1,12 +1,13 @@
-__all__ = ["parse", "compile", "eval"]
+__all__ = ["compile", "eval", "parse"]
 
 from typing import Any, Optional
+
 from ..dsl import MolangExpr
 from .ast import Node
-from .parse import parse_expression
+from .context import create_context
 from .emit import to_molang
 from .eval import evaluate
-from .context import create_context
+from .parse import parse_expression
 
 
 def parse(expr: str | MolangExpr) -> Node:

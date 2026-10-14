@@ -1,5 +1,6 @@
 from typing import Any
-from molang import eval, create_context
+
+from molang import create_context, eval
 
 
 def block_state(name: str) -> Any:

@@ -1,4 +1,4 @@
-__all__ = ["Node", "Number", "String", "Variable", "Unary", "Binary", "Ternary", "Assign", "Call"]
+__all__ = ["Assign", "Binary", "Call", "Node", "Number", "String", "Ternary", "Unary", "Variable"]
 
 
 class Node:

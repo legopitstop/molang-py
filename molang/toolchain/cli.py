@@ -1,7 +1,8 @@
+import time
 from argparse import ArgumentParser
 from typing import Any
+
 import molang
-import time
 
 parser = ArgumentParser(prog="molang", description="Run molang files")
 parser.add_argument(

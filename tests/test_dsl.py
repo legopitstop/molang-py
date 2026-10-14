@@ -1,16 +1,17 @@
+from pydantic import BaseModel
+
 from molang.dsl import (
     MolangExpr,
     array,
+    context,
+    geometry,
+    material,
     math,
     query,
-    variable,
-    geometry,
     temp,
-    context,
     texture,
-    material,
+    variable,
 )
-from pydantic import BaseModel
 
 
 def test_query():

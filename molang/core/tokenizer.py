@@ -1,6 +1,7 @@
 __all__ = ["tokenize"]
 
 import re
+
 from ..dsl import MolangExpr
 
 TOKEN_REGEX = re.compile(

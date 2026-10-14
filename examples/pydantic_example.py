@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+
 from molang.dsl import MolangExpr, query
 
 
