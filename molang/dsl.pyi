@@ -440,12 +440,21 @@ class QueryNamespace(VariableNamespace):
     wing_flap_speed: MolangExpr
     yaw_speed: MolangExpr
 
+class GeometryNamespace(VariableNamespace):
+    default: MolangExpr
+
+class TextureNamespace(VariableNamespace):
+    default: MolangExpr
+
+class MaterialNamespace(VariableNamespace):
+    default: MolangExpr
+
 variable: VariableNamespace
 temp: VariableNamespace
 context: VariableNamespace
-geometry: VariableNamespace
-texture: VariableNamespace
-material: VariableNamespace
+geometry: GeometryNamespace
+texture: TextureNamespace
+material: MaterialNamespace
 query: QueryNamespace
 array: ArrayNamespace
 math: MathNamespace

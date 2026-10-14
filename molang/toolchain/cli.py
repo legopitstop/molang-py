@@ -42,12 +42,13 @@ def main() -> Any:
         return str(result)
 
     start = time.time()
+    ctx = molang.create_context()
+    ctx["query"]["anim_time"] = 0
     while True:
         try:
             code = input(">> ")
-            if code == "exit":
+            if code == "exit" or code == "exit()":
                 break
-            ctx = molang.create_context()
             ctx["query"]["anim_time"] = round(time.time() - start, 3)
             result = molang.eval(code, ctx)
             print(result)

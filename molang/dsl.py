@@ -82,6 +82,9 @@ class MolangExpr:
     def _log(self, op: str, other: Any) -> "MolangExpr":
         return MolangExpr(f"{self} {op} {MolangExpr.value(other)}")
 
+    def __hash__(self) -> int:
+        return hash(self.expr)
+
     def __str__(self) -> str:
         return self.expr
 
@@ -188,6 +191,18 @@ class MathNamespace(VariableNamespace):
     pass
 
 
+class GeometryNamespace(VariableNamespace):
+    pass
+
+
+class TextureNamespace(VariableNamespace):
+    pass
+
+
+class MaterialNamespace(VariableNamespace):
+    pass
+
+
 class QueryNamespace(VariableNamespace):
     pass
 
@@ -195,9 +210,9 @@ class QueryNamespace(VariableNamespace):
 variable = VariableNamespace("variable")
 temp = VariableNamespace("temp")
 context = VariableNamespace("context")
-geometry = VariableNamespace("geometry")
-texture = VariableNamespace("texture")
-material = VariableNamespace("material")
+geometry = GeometryNamespace("geometry")
+texture = TextureNamespace("texture")
+material = MaterialNamespace("material")
 query = QueryNamespace("query")
 math = MathNamespace("math")
 array = ArrayNamespace()
